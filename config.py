@@ -23,12 +23,12 @@ curl_str = os.getenv('WXREAD_CURL_BASH')
 
 # headers、cookies是一个省略模版，本地或者docker部署时对应替换
 cookies = {
-    'RK': 'oxEY1bTnXf',
-    'ptcz': '53e3b35a9486dd63c4d06430b05aa169402117fc407dc5cc9329b41e59f62e2b',
+    'RK': 'xzsh0fMOVJ',
+    'ptcz': '626491ceda7231fb30fe8ec33d45412f8c7ff2c43debfe9f9b751367454ba191',
     'pac_uid': '0_e63870bcecc18',
     'iip': '0',
-    '_qimei_uuid42': '183070d3135100ee797b08bc922054dc3062834291',
-    'wr_avatar': 'https%3A%2F%2Fthirdwx.qlogo.cn%2Fmmopen%2Fvi_32%2FeEOpSbFh2Mb1bUxMW9Y3FRPfXwWvOLaNlsjWIkcKeeNg6vlVS5kOVuhNKGQ1M8zaggLqMPmpE5qIUdqEXlQgYg%2F132',
+    '_qimei_uuid42': '191150d120510054c6141a3309bda049b26a822f6d',
+    'wr_avatar': 'https%3A%2F%2Fthirdwx.qlogo.cn%2Fmmopen%2Fvi_32%2FPiajxSqBRaEIbibQ84hicAvZ2gZXpCCc41wxM1ZnSe0yUB9VxPSpeG1DZtkacPZYnxE0N2O67czsS1bwPmkDPVbQjCfkSYWrdQ2Ru1w7JmSW1TnPQNzsQiaBbQ%2F132',
     'wr_gender': '0',
 }
 
@@ -44,20 +44,20 @@ headers = {
 建议保留区域|默认读三体，其它书籍自行测试时间是否增加
 """
 data = {
-    "appId": "wb182564874663h152492176",
-    "b": "ce032b305a9bc1ce0b0dd2a",
-    "c": "7cb321502467cbbc409e62d",
-    "ci": 70,
-    "co": 0,
-    "sm": "[插图]第三部广播纪元7年，程心艾AA说",
-    "pr": 74,
-    "rt": 30,
-    "ts": 1727660516749,
-    "rn": 31,
-    "sg": "991118cc229871a5442993ecb08b5d2844d7f001dbad9a9bc7b2ecf73dc8db7e",
-    "ct": 1727660516,
-    "ps": "b1d32a307a4c3259g016b67",
-    "pc": "080327b07a4c3259g018787",
+    "appId": "wb182564874663h776775553",
+    "b": "612327107189997b612511d",
+    "c": "1c3321802231c383cd30bb3",
+    "ci": 35,
+    "co": 419,
+    "sm": "5.9　移位和循环指令TIA博途软件移位",
+    "pr": 99,
+    "rt": 14,
+    "ts": 1742110495206,
+    "rn": 604,
+    "sg": "7fd6df8f2262dcb802731aa432ac230f3c099bf8cb2abbd03a3d3e234c4a2722",
+    "ct": 1742110495,
+    "ps": "272326e07a623fe7g018361",
+    "pc": "6bd322007a623fe8g01005f",
 }
 
 
