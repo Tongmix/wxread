@@ -72,9 +72,6 @@ def get_wr_skey():
             logging.warning(f"刷新密钥请求失败，状态码: {response.status_code}")
             return None
         
-        # 打印完整的响应头，用于调试
-        logging.info(f"密钥刷新响应头: {dict(response.headers)}")
-        
         # 提取所有cookie
         new_cookies = {}
         for cookie in response.headers.get('Set-Cookie', '').split(','):
@@ -83,23 +80,24 @@ def get_wr_skey():
                     key, value = item.strip().split('=', 1)
                     new_cookies[key] = value
         
-        logging.info(f"获取到的新cookie: {new_cookies}")
+        logging.info("已获取新cookie")
         
         # 更新所有相关cookie
         if new_cookies:
             for key, value in new_cookies.items():
                 if key in cookies:
                     cookies[key] = value
-                    logging.info(f"更新cookie: {key}={value}")
             
             # 特别检查wr_skey
             if 'wr_skey' in new_cookies:
+                logging.info("成功获取wr_skey")
                 return new_cookies['wr_skey']
         
         # 尝试从响应体中获取信息
         try:
             resp_data = response.json()
-            logging.info(f"密钥刷新响应内容: {resp_data}")
+            if 'errcode' in resp_data:
+                logging.warning(f"密钥刷新失败，错误码: {resp_data.get('errcode')}")
         except:
             logging.warning("无法解析响应内容为JSON")
         
@@ -155,7 +153,7 @@ def reset_session():
         
         # 更新cookies
         new_cookies = dict(session.cookies)
-        logging.info(f"新会话cookies: {new_cookies}")
+        logging.info("已获取新会话cookies")
         
         # 更新全局cookies
         for key, value in new_cookies.items():
@@ -203,7 +201,7 @@ def refresh_cookies():
     new_skey = get_wr_skey()
     if new_skey:
         cookies['wr_skey'] = new_skey
-        logging.info(f"✅ 密钥刷新成功，新密钥：{new_skey}")
+        logging.info("✅ 密钥刷新成功")
         time.sleep(random.uniform(2, 4))
         return True
     
@@ -256,7 +254,7 @@ def check_cookie_valid():
                 logging.info("✅ 当前cookie有效，无需刷新")
                 return True
             else:
-                logging.info(f"❌ 当前cookie已失效，响应内容: {resp_data}")
+                logging.info("❌ 当前cookie已失效")
                 return False
         else:
             logging.warning(f"❌ 验证cookie请求失败，状态码: {response.status_code}")
@@ -337,10 +335,6 @@ while index <= READ_NUM:
             ]
             headers['user-agent'] = random.choice(user_agents)
         
-        # 记录请求参数，便于调试
-        if index % 5 == 0:  # 每5次记录一次请求参数
-            logging.info(f"请求参数: {json.dumps({k: data[k] for k in data if not k.startswith('_')})}")
-        
         response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(data, separators=(',', ':')))
         
         # 检查HTTP状态码
@@ -373,7 +367,7 @@ while index <= READ_NUM:
                 time.sleep(random.uniform(2, 5))
 
         else:
-            logging.warning(f"❌ cookie 已过期，响应内容: {resData}")
+            logging.warning("❌ cookie 已过期")
             consecutive_failures += 1
             
             # 如果连续失败次数过多，重置到初始状态
