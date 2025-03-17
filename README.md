@@ -46,8 +46,8 @@
 | ------------------------- | ---------------------------------- | ------------------------------------------------------------ | --------- |
 | `WXREAD_CURL_BASH`         | `read` 接口 `curl_bash`数据 | **必填**，必须提供有效指令                                   | secrets   |
 | `READ_TIME`                | 总阅读时间（分钟）                  | **可选**，设置总阅读时间，默认60分钟                         | variables |
-| `READ_MIN_INTERVAL`        | 最小阅读间隔（秒）                  | **可选**，单次阅读最短时间，默认20秒                         | variables |
-| `READ_MAX_INTERVAL`        | 最大阅读间隔（秒）                  | **可选**，单次阅读最长时间，默认40秒                         | variables |
+| `READ_MIN_INTERVAL`        | 最小阅读间隔（秒）                  | **可选**，单次阅读最短时间，默认5秒                         | variables |
+| `READ_MAX_INTERVAL`        | 最大阅读间隔（秒）                  | **可选**，单次阅读最长时间，默认15秒                         | variables |
 | `PUSH_METHOD`              | `pushplus`/`wxpusher`/`telegram`    | **可选**，推送方式，3选1，默认不推送                         | secrets   |
 | `PUSHPLUS_TOKEN`           | PushPlus 的 token                   | 当 `PUSH_METHOD=pushplus` 时必填，[获取地址](https://www.pushplus.plus/uc.html) | secrets   |
 | `WXPUSHER_SPT`             | WxPusher 的token                    | 当 `PUSH_METHOD=wxpusher` 时必填，[获取地址](https://wxpusher.zjiecode.com/docs/#/?id=获取spt) | secrets   |
