@@ -1,7 +1,3 @@
-*推一个机场可以走我的优惠码【88888888】相当于50多一年，trySmall可用*<br>
-`AFF`*【科学上网】机场地址--->[R星云](https://web.rstar.cloud/)<---机场地址【科学上网】*`AFF` <br>
-*觉得这个项目对你有帮助恰巧你需要节点的话可以看一下*
-
 
 
 ## 项目介绍 📚
@@ -39,7 +35,9 @@
   - `PUSHPLUS_TOKEN` or `WXPUSHER_SPT` or `TELEGRAM_BOT_TOKEN`&`TELEGRAM_CHAT_ID`: 选择推送后填写对应token。
   
 - 在 **Variables** 部分，最下方添加变量：
-  - `READ_NUM`：设定每次阅读的目标次数。
+  - `READ_TIME`：设定每次阅读的目标时间。
+  - `READ_MIN_INTERVAL`：设定每次阅读的最小间隔时间。
+  - `READ_MAX_INTERVAL`：设定每次阅读的最大间隔时间。
 
 
 - 基本释义：
@@ -47,18 +45,15 @@
 | key                        | Value                               | 说明                                                         | 属性      |
 | ------------------------- | ---------------------------------- | ------------------------------------------------------------ | --------- |
 | `WXREAD_CURL_BASH`         | `read` 接口 `curl_bash`数据 | **必填**，必须提供有效指令                                   | secrets   |
-| `READ_NUM`                 | 阅读次数（每次 30 秒）              | **可选**，阅读时长，默认 60 分钟                           | variables |
-| `PUSH_METHOD`              | `pushplus`/`wxpusher`/`telegram`    | **可选**，推送方式，3选1，默认不推送                                       |    secrets     |
+| `READ_TIME`                | 总阅读时间（分钟）                  | **可选**，设置总阅读时间，默认60分钟                         | variables |
+| `READ_MIN_INTERVAL`        | 最小阅读间隔（秒）                  | **可选**，单次阅读最短时间，默认20秒                         | variables |
+| `READ_MAX_INTERVAL`        | 最大阅读间隔（秒）                  | **可选**，单次阅读最长时间，默认40秒                         | variables |
+| `PUSH_METHOD`              | `pushplus`/`wxpusher`/`telegram`    | **可选**，推送方式，3选1，默认不推送                         | secrets   |
 | `PUSHPLUS_TOKEN`           | PushPlus 的 token                   | 当 `PUSH_METHOD=pushplus` 时必填，[获取地址](https://www.pushplus.plus/uc.html) | secrets   |
 | `WXPUSHER_SPT`             | WxPusher 的token                    | 当 `PUSH_METHOD=wxpusher` 时必填，[获取地址](https://wxpusher.zjiecode.com/docs/#/?id=获取spt) | secrets   |
 | `TELEGRAM_BOT_TOKEN`  <br>`TELEGRAM_CHAT_ID`   <br>`http_proxy`/`https_proxy`（可选）| 群组id以及机器人token                 | 当 `PUSH_METHOD=telegram` 时必填，[配置文档](https://www.nodeseek.com/post-22475-1) | secrets   |
 
-**重要：除了READ_NUM配置在varables，其它的都配置在secrets里面的；需要推送`PUSH_METHOD`是必填的。**
-
-### 视频教程
-
-[![视频教程](https://github.com/user-attachments/assets/ec144869-3dbb-40fe-9bc5-f8bf1b5fce3c)](https://www.bilibili.com/video/BV1kJ6gY3En3/ "点击查看视频")
-
+**重要：除了READ_TIME配置在varables，其它的都配置在secrets里面的；需要推送`PUSH_METHOD`是必填的。**
 
 ### 方法二： 服务器运行（docker部署）
 
@@ -66,7 +61,7 @@
 - 或者通过docker运行，将抓到的bash命令在 [Convert](https://curlconverter.com/python/) 转化为Python字典格式，复制需要的headers与cookies即可（data不需要）。
 
 steps1：克隆这个项目：`git clone https://github.com/findmover/wxread.git`<br>
-steps2：配置config.py里的headers、cookies、READ_NUM、PUSH_METHOD以及对应推送方式token<br>
+steps2：配置config.py里的headers、cookies、READ_TIME、PUSH_METHOD以及对应推送方式token<br>
 steps3：进入目录使用镜像构建容器：
 `docker rm -f wxread && docker build -t wxread . && docker run -d --name wxread -v $(pwd)/logs:/app/logs --restart always wxread`<br>
 steps4：测试：`docker exec -it wxread python /app/main.py`
@@ -76,7 +71,7 @@ steps4：测试：`docker exec -it wxread python /app/main.py`
 
 1. **签到次数调整**：只需签到完成挑战赛可以将`num`次数从120调整为2，每次`num`为30秒，200即100分钟。
    
-2. **解决阅读时间问题**：对于issue中提出的“阅读时间没有增加”，“增加时间与刷的时间不对等”建议保留`config.py`中的【data】字段，默认阅读三体，其它书籍自行测试。
+2. **解决阅读时间问题**：对于issue中提出的"阅读时间没有增加"，"增加时间与刷的时间不对等"建议保留`config.py`中的【data】字段，默认阅读三体，其它书籍自行测试。
 
 3. **GitHub Action部署/本地部署**：主要配置config.py即可，Action部署使用环境变量，本地部署修改config.py里的阅读次数、headers、cookies即可。
 
