@@ -264,6 +264,58 @@ def check_cookie_valid():
         return False
 
 
+def simulate_next_page_turn():
+    """模拟翻到下一页"""
+    # 保存当前页面数据，以便在失败时回退
+    original_data = data.copy()
+    
+    try:
+        # 更新时间戳和随机数
+        current_time = int(time.time())
+        current_time_ms = int(time.time() * 1000)
+        random_num = random.randint(100, 999)
+        
+        # 更新基本时间参数
+        data['ct'] = current_time
+        data['ts'] = current_time_ms
+        data['rn'] = random_num
+        
+        # 更新页面标识 - 这里需要根据实际规律调整
+        # 假设ps和pc的最后6位是页码相关信息
+        try:
+            # 提取ps的基础部分和页码部分
+            ps_base = data['ps'][:-6]
+            ps_page = int(data['ps'][-6:], 16) + 1  # 假设是16进制页码
+            data['ps'] = f"{ps_base}{ps_page:06x}"
+            
+            # 类似处理pc
+            pc_base = data['pc'][:-6]
+            pc_page = int(data['pc'][-6:], 16) + 1
+            data['pc'] = f"{pc_base}{pc_page:06x}"
+            
+            # 小幅增加阅读进度
+            data['pr'] = min(data['pr'] + random.uniform(0.5, 1.0), 100)
+            
+            # 更新阅读时间 - 假设每页阅读10-20秒
+            data['rt'] = random.randint(10, 20)
+            
+            # 更新安全签名
+            data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
+            data['s'] = cal_hash(encode_data(data))
+            
+            logging.info("📖 模拟翻页，更新页面标识")
+            return True, original_data
+        except Exception as e:
+            logging.error(f"解析页面标识时出错: {str(e)}")
+            # 恢复原始数据
+            for key, value in original_data.items():
+                data[key] = value
+            return False, None
+    except Exception as e:
+        logging.error(f"模拟翻页时发生错误: {str(e)}")
+        return False, None
+
+
 # 主循环
 index = 1
 retry_count = 0
@@ -365,6 +417,24 @@ while index <= READ_NUM:
                 logging.info("🔄 定期刷新cookie...")
                 refresh_cookies()
                 time.sleep(random.uniform(2, 5))
+
+            # 在成功阅读后，随机决定是否翻页
+            if 'succ' in resData and index > 5 and random.random() < 0.2:  # 20%概率翻页
+                # 先等待一段时间，模拟阅读当前页面
+                read_time = random.randint(15, 25)
+                logging.info(f"📚 阅读当前页面 {read_time} 秒...")
+                time.sleep(read_time)
+                
+                # 模拟翻页
+                success, original_data = simulate_next_page_turn()
+                if success:
+                    # 翻页后短暂等待，模拟页面加载时间
+                    time.sleep(random.uniform(1.0, 2.5))
+                    
+                    # 翻页后立即刷新cookie
+                    logging.info("🔄 翻页后刷新cookie...")
+                    refresh_cookies()
+                    time.sleep(random.uniform(2, 4))
 
         else:
             logging.warning("❌ cookie 已过期")
