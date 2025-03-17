@@ -355,13 +355,13 @@ while index <= READ_NUM:
             consecutive_failures = 0  # 重置连续失败计数
             
             # 随机等待时间（25-45秒），模拟阅读
-            wait_time = random.randint(25, 45)
+            wait_time = random.randint(15, 35)
             logging.info(f"✅ 阅读成功，等待 {wait_time} 秒后继续...")
             time.sleep(wait_time)
             logging.info(f"📊 阅读进度：{(index - 1) * 0.5} 分钟")
             
             # 每隔一定次数主动刷新cookie，避免过期
-            if index % 8 == 0:
+            if index % 16 == 0:
                 logging.info("🔄 定期刷新cookie...")
                 refresh_cookies()
                 time.sleep(random.uniform(2, 5))
