@@ -76,10 +76,14 @@ def get_wr_skey():
 
 
 # 主循环 - 执行自动阅读
-index = 1
 total_read_time = 0  # 记录实际阅读时间(秒)
 total_intervals = len(reading_intervals)
 
+# 打印初始化信息，帮助调试
+logging.info(f"🔍 初始化完成: 目标阅读时间 {READ_TIME} 分钟，生成了 {total_intervals} 个阅读间隔")
+logging.info(f"🔍 前5个阅读间隔: {reading_intervals[:5] if len(reading_intervals) >= 5 else reading_intervals}")
+
+index = 1
 while index <= total_intervals:
     # 更新请求数据中的时间戳和随机数
     data['ct'] = int(time.time())
