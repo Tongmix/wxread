@@ -20,6 +20,40 @@ COOKIE_DATA = {"rq": "%2Fweb%2Fbook%2Fread"}
 READ_URL = "https://weread.qq.com/web/book/read"
 RENEW_URL = "https://weread.qq.com/web/login/renewal"
 
+def simulate_page_turn(data):
+    """模拟翻页
+    Args:
+        data: 请求数据字典
+    """
+    # 随机翻页次数(2-5次)，避免翻太快
+    page_turns = random.randint(2, 5)
+    current_page = data.get('pf', 1)  # 获取当前页码，默认从第1页开始
+    
+    for i in range(page_turns):
+        # 随机翻页间隔(8-15秒)，更接近真实阅读时间
+        time.sleep(random.uniform(8, 15))
+        current_page += 1
+        # 更新请求数据中的页码
+        data['pf'] = current_page
+        data['pc'] = current_page - 1  # 上一页的页码
+        logging.info(f"📖 第 {i+1}/{page_turns} 次翻页，当前页码：{current_page}")
+        
+        # 重新生成时间戳和签名
+        data['ct'] = int(time.time())
+        data['ts'] = int(time.time() * 1000)
+        data['rn'] = random.randint(0, 1000)
+        data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
+        data['s'] = cal_hash(encode_data(data))
+        
+        # 发送翻页请求
+        response = requests.post(READ_URL, headers=headers, cookies=cookies, 
+                               data=json.dumps(data, separators=(',', ':')))
+        if 'succ' not in response.json():
+            logging.warning("⚠️ 翻页请求失败，继续阅读...")
+            break
+        
+        # 随机增加1-3秒的停顿，模拟阅读内容
+        time.sleep(random.uniform(1, 3))
 
 def encode_data(data):
     """数据编码"""
@@ -58,6 +92,11 @@ while index <= READ_NUM:
     data['rn'] = random.randint(0, 1000)
     data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
     data['s'] = cal_hash(encode_data(data))
+    
+    # 初始化页码参数
+    if 'pf' not in data:
+        data['pf'] = 1  # 当前页码
+        data['pc'] = 0  # 上一页页码
 
     logging.info(f"⏱️ 尝试第 {index} 次阅读...")
     response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(data, separators=(',', ':')))
