@@ -38,7 +38,9 @@ jobs:
         WXPUSHER_SPT: ${{ secrets.WXPUSHER_SPT }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        READ_NUM: ${{ vars.READ_NUM }}  # 使用 Repository Variables
+        READ_MIN_INTERVAL: ${{ vars.READ_MIN_INTERVAL }}
+        READ_MAX_INTERVAL: ${{ vars.READ_MAX_INTERVAL }}
+        READ_TIME: ${{ vars.READ_TIME }}  # 使用 Repository Variables
 
       run: |
         python main.py
