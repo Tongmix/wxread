@@ -10,7 +10,7 @@ import hashlib
 import requests
 import urllib.parse
 from push import push  # 导入推送通知模块
-from config import data, headers, cookies, READ_NUM, PUSH_METHOD  # 导入配置
+from config import data, headers, cookies, reading_intervals, READ_TIME, PUSH_METHOD  # 导入配置
 
 # 配置日志记录
 logger = logging.getLogger(__name__)
@@ -77,11 +77,14 @@ def get_wr_skey():
 
 # 主循环 - 执行自动阅读
 index = 1
-while index <= READ_NUM:
+total_read_time = 0  # 记录实际阅读时间(秒)
+total_intervals = len(reading_intervals)
+
+while index <= total_intervals:
     # 更新请求数据中的时间戳和随机数
-    data['ct'] = int(time.time())  # 当前时间戳(秒)
-    data['ts'] = int(time.time() * 1000)  # 当前时间戳(毫秒)
-    data['rn'] = random.randint(0, 1000)  # 随机数
+    data['ct'] = int(time.time())
+    data['ts'] = int(time.time() * 1000)
+    data['rn'] = random.randint(0, 1000)
     
     # 计算安全签名
     data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
@@ -90,15 +93,23 @@ while index <= READ_NUM:
     data['s'] = cal_hash(encode_data(data))
 
     # 发送阅读请求
-    logging.info(f"⏱️ 尝试第 {index} 次阅读...")
+    logging.info(f"⏱️ 尝试第 {index}/{total_intervals} 次阅读...")
     response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(data, separators=(',', ':')))
     resData = response.json()
 
     if 'succ' in resData:
-        # 阅读成功，增加计数并等待30秒
+        # 获取本次阅读等待时间
+        wait_time = reading_intervals[index-1]
+        total_read_time += wait_time
+        
+        # 阅读成功，增加计数并等待
         index += 1
-        time.sleep(30)  # 每次阅读间隔30秒
-        logging.info(f"✅ 阅读成功，阅读进度：{(index - 1) * 0.5} 分钟")
+        
+        # 显示详细的进度信息
+        progress_percent = (total_read_time / (READ_TIME * 60)) * 100
+        logging.info(f"✅ 阅读成功，等待 {wait_time} 秒，总计: {total_read_time}秒/{READ_TIME*60}秒 ({progress_percent:.1f}%)")
+        
+        time.sleep(wait_time)  # 等待指定的时间
 
     else:
         # 阅读失败，可能是cookie过期，尝试刷新
@@ -120,9 +131,10 @@ while index <= READ_NUM:
     data.pop('s')
 
 # 阅读完成
-logging.info("🎉 阅读脚本已完成！")
+minutes_read = total_read_time / 60
+logging.info(f"🎉 阅读脚本已完成！总计阅读时间: {minutes_read:.1f}分钟，目标时间: {READ_TIME}分钟")
 
 # 如果配置了推送方式，发送完成通知
 if PUSH_METHOD not in (None, ''):
     logging.info("⏱️ 开始推送...")
-    push(f"🎉 微信读书自动阅读完成！\n⏱️ 阅读时长：{(index - 1) * 0.5}分钟。", PUSH_METHOD)
+    push(f"🎉 微信读书自动阅读完成！\n⏱️ 目标阅读时长：{READ_TIME}分钟\n⏱️ 实际阅读时长：{minutes_read:.1f}分钟", PUSH_METHOD)
