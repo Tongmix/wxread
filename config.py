@@ -12,8 +12,8 @@ import re
 # 阅读时间 默认60分钟
 READ_TIME = int(os.getenv('READ_TIME') or 60)
 # 单次阅读时间的波动范围(秒)，默认在20-40秒之间波动
-READ_MIN_INTERVAL = int(os.getenv('READ_MIN_INTERVAL') or 15)
-READ_MAX_INTERVAL = int(os.getenv('READ_MAX_INTERVAL') or 35)
+READ_MIN_INTERVAL = int(os.getenv('READ_MIN_INTERVAL') or 5)
+READ_MAX_INTERVAL = int(os.getenv('READ_MAX_INTERVAL') or 15)
 
 # 推送通知方式 - 支持pushplus、wxpusher、telegram三种方式
 # 留空表示不推送通知
