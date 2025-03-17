@@ -194,12 +194,59 @@ def exponential_backoff(attempt):
     return wait_time
 
 
+def refresh_cookies():
+    """刷新所有cookie并确保会话有效"""
+    logging.info("🔄 开始刷新会话...")
+    
+    # 先尝试重置会话
+    if reset_session():
+        logging.info("✅ 会话重置成功")
+        time.sleep(random.uniform(2, 4))
+        return True
+    
+    # 如果重置失败，尝试刷新密钥
+    logging.info("会话重置失败，尝试刷新密钥...")
+    new_skey = get_wr_skey()
+    if new_skey:
+        cookies['wr_skey'] = new_skey
+        logging.info(f"✅ 密钥刷新成功，新密钥：{new_skey}")
+        time.sleep(random.uniform(2, 4))
+        return True
+    
+    logging.warning("❌ 无法刷新会话或密钥")
+    return False
+
+
 # 主循环
 index = 1
 retry_count = 0
 max_retries = 5
 consecutive_failures = 0
 max_consecutive_failures = 3
+
+# 在开始阅读前先刷新cookie
+logging.info("🚀 开始执行阅读脚本...")
+logging.info("🔑 在开始阅读前先刷新cookie")
+
+# 尝试刷新cookie，如果失败则重试
+cookie_refresh_success = False
+for i in range(3):  # 最多尝试3次
+    if refresh_cookies():
+        cookie_refresh_success = True
+        logging.info("✅ Cookie刷新成功，准备开始阅读")
+        break
+    else:
+        logging.warning(f"⚠️ 第{i+1}次Cookie刷新失败，等待后重试...")
+        time.sleep(exponential_backoff(i))
+
+if not cookie_refresh_success:
+    ERROR_CODE = "❌ 无法刷新Cookie，请检查配置或稍后再试"
+    logging.error(ERROR_CODE)
+    push(ERROR_CODE, PUSH_METHOD)
+    raise Exception(ERROR_CODE)
+
+# 等待一段时间再开始阅读
+time.sleep(random.uniform(3, 6))
 
 while index <= READ_NUM:
     try:
@@ -255,6 +302,12 @@ while index <= READ_NUM:
             logging.info(f"✅ 阅读成功，等待 {wait_time} 秒后继续...")
             time.sleep(wait_time)
             logging.info(f"📊 阅读进度：{(index - 1) * 0.5} 分钟")
+            
+            # 每隔一定次数主动刷新cookie，避免过期
+            if index % 10 == 0:
+                logging.info("🔄 定期刷新cookie...")
+                refresh_cookies()
+                time.sleep(random.uniform(2, 5))
 
         else:
             logging.warning(f"❌ cookie 已过期，响应内容: {resData}")
@@ -269,23 +322,11 @@ while index <= READ_NUM:
             # 在重试前等待一段时间
             time.sleep(random.uniform(2, 5))
             
-            # 尝试不同的刷新方法
-            if retry_count % 3 == 0:  # 每三次尝试一次完全重置会话
-                logging.info("尝试完全重置会话...")
-                reset_success = reset_session()
-                if reset_success:
-                    logging.info("✅ 会话重置成功")
-                    time.sleep(random.uniform(3, 7))
-                    continue
-            
-            # 常规刷新密钥
-            new_skey = get_wr_skey()
-            if new_skey:
-                cookies['wr_skey'] = new_skey
-                logging.info(f"✅ 密钥刷新成功，新密钥：{new_skey}")
-                logging.info(f"🔄 重新本次阅读。")
-                # 刷新成功后额外等待，避免立即请求
+            # 刷新cookie
+            if refresh_cookies():
+                logging.info("✅ Cookie刷新成功，继续阅读")
                 time.sleep(random.uniform(3, 7))
+                continue
             else:
                 retry_count += 1
                 if retry_count >= max_retries:
@@ -295,7 +336,7 @@ while index <= READ_NUM:
                     raise Exception(ERROR_CODE)
                 
                 wait_time = exponential_backoff(retry_count)
-                logging.warning(f"⚠️ 无法获取新密钥，第 {retry_count} 次重试，等待 {wait_time:.2f} 秒...")
+                logging.warning(f"⚠️ 无法刷新Cookie，第 {retry_count} 次重试，等待 {wait_time:.2f} 秒...")
                 time.sleep(wait_time)
     except requests.exceptions.RequestException as e:
         logging.error(f"网络请求错误: {str(e)}")
