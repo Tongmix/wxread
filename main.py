@@ -166,24 +166,34 @@ def reset_session():
 
 def simulate_page_turn(current_progress):
     """模拟翻页，更新阅读进度参数"""
-    # 随机增加阅读进度（1-3个百分点）
-    progress_increment = random.randint(1, 3)
-    new_progress = min(current_progress + progress_increment, 100)
+    # 更自然的进度增量（0.5-2个百分点）
+    progress_increment = random.uniform(0.5, 2.0)
+    new_progress = min(round(current_progress + progress_increment, 1), 100)
     
     # 更新data中的进度相关参数
     data['pr'] = new_progress
     
+    # 更新阅读时间参数 - 重要：每次翻页都需要更新时间戳
+    data['ct'] = int(time.time())
+    data['ts'] = int(time.time() * 1000)
+    data['rn'] = random.randint(0, 1000)
+    
     # 更新页面位置参数（ps和pc通常是页面位置的标识）
-    # 这里使用简单的随机字符串模拟新的页面位置
-    page_id = hashlib.md5(str(time.time() + random.random()).encode()).hexdigest()[:20]
-    data['ps'] = f"b1d32a307a4c3259g{page_id[:6]}"
-    data['pc'] = f"080327b07a4c3259g{page_id[6:12]}"
+    # 使用更真实的页面ID生成方式
+    base_id = "b1d32a307a4c3259g"
+    page_num = int(new_progress * 100)  # 基于进度计算页码
+    page_id = f"{base_id}{page_num:06d}"
     
-    # 更新章节位置（如果需要）
-    if new_progress > 90 and data['ci'] < 100:
-        data['ci'] += 1
+    # 确保ps和pc值有细微差异但保持一定关联
+    data['ps'] = f"{page_id[:15]}{random.randint(100, 999)}"
+    data['pc'] = f"{page_id[:12]}{random.randint(1000, 9999)}"
     
-    # 随机更新sm参数（模拟不同的阅读内容）
+    # 更新章节位置（如果需要）- 更自然的章节变化
+    if new_progress > data.get('_last_chapter_change', 0) + 10:  # 每增加10%进度更新一次章节
+        data['ci'] = min(data['ci'] + 1, 100)
+        data['_last_chapter_change'] = new_progress
+    
+    # 更新阅读内容 - 基于进度选择不同的内容
     reading_contents = [
         "[插图]第三部广播纪元7年，程心艾AA说",
         "三体舰队即将抵达，人类文明面临最大危机",
@@ -191,7 +201,13 @@ def simulate_page_turn(current_progress):
         "黑暗森林法则揭示了宇宙文明的生存法则",
         "智子监控下，人类科技发展受到极大限制"
     ]
-    data['sm'] = random.choice(reading_contents)
+    # 根据进度选择内容，使内容变化更连贯
+    content_index = min(int(new_progress / 20), len(reading_contents) - 1)
+    data['sm'] = reading_contents[content_index]
+    
+    # 更新阅读时长参数 - rt应该随着阅读进度增加
+    # 假设每页阅读30秒
+    data['rt'] = min(30 + int(new_progress / 5), 60)
     
     logging.info(f"📖 模拟翻页，阅读进度更新为: {new_progress}%")
     return new_progress
@@ -214,9 +230,12 @@ while index <= READ_NUM:
         # 添加随机延迟，使请求看起来更自然
         time.sleep(random.uniform(0.5, 1.5))
         
+        # 更新时间戳和随机数
         data['ct'] = int(time.time())
         data['ts'] = int(time.time() * 1000)
         data['rn'] = random.randint(0, 1000)
+        
+        # 计算签名
         data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
         data['s'] = cal_hash(encode_data(data))
 
@@ -231,6 +250,10 @@ while index <= READ_NUM:
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0'
             ]
             headers['user-agent'] = random.choice(user_agents)
+        
+        # 记录请求参数，便于调试
+        if index % 5 == 0:  # 每5次记录一次请求参数
+            logging.info(f"请求参数: {json.dumps({k: data[k] for k in data if not k.startswith('_')})}")
         
         response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(data, separators=(',', ':')))
         
@@ -249,18 +272,55 @@ while index <= READ_NUM:
             index += 1
             retry_count = 0  # 重置重试计数
             
-            # 随机决定是否翻页
-            if random.random() < 0.7:  # 70%的概率翻页
-                current_progress = simulate_page_turn(current_progress)
+            # 更自然的翻页模式
+            # 前几次阅读不翻页，让系统认为用户在阅读当前页面
+            if index <= 3:
+                logging.info("📚 初始阅读阶段，不翻页...")
+                wait_time = random.randint(30, 45)  # 初始阅读时间稍长
+            else:
+                # 随机决定是否翻页，概率随着阅读次数增加而增加
+                page_turn_probability = min(0.4 + (index / READ_NUM) * 0.3, 0.7)
+                
+                if random.random() < page_turn_probability:
+                    # 在翻页前先等待一段时间，模拟阅读当前页面
+                    pre_turn_wait = random.randint(15, 25)
+                    logging.info(f"📖 阅读当前页面 {pre_turn_wait} 秒...")
+                    time.sleep(pre_turn_wait)
+                    
+                    # 翻页
+                    current_progress = simulate_page_turn(current_progress)
+                    
+                    # 翻页后短暂等待，模拟页面加载时间
+                    time.sleep(random.uniform(1.0, 2.5))
+                else:
+                    logging.info("📚 继续阅读当前页面，不翻页")
+                
+                # 阅读等待时间
+                wait_time = random.randint(25, 40)
             
-            # 随机等待时间（25-60秒），更接近真实阅读
-            wait_time = random.randint(25, 60)
             logging.info(f"✅ 阅读成功，等待 {wait_time} 秒后继续...")
             time.sleep(wait_time)
             logging.info(f"📊 阅读进度：{(index - 1) * 0.5} 分钟")
 
         else:
             logging.warning(f"❌ cookie 已过期，响应内容: {resData}")
+            
+            # 如果是在翻页后立即失效，尝试回退翻页
+            if 'last_page_turn_index' in data and index - data['last_page_turn_index'] <= 1:
+                logging.info("⚠️ 检测到翻页后立即失效，尝试回退翻页状态")
+                # 回退进度
+                current_progress = max(current_progress - 5, data.get('_original_progress', 0))
+                data['pr'] = current_progress
+                
+                # 重置页面位置参数
+                if '_original_ps' in data and '_original_pc' in data:
+                    data['ps'] = data['_original_ps']
+                    data['pc'] = data['_original_pc']
+                
+                # 等待较长时间后重试
+                time.sleep(random.uniform(10, 15))
+                continue
+            
             # 在重试前等待一段时间
             time.sleep(random.uniform(2, 5))
             
@@ -305,6 +365,16 @@ while index <= READ_NUM:
         logging.warning(f"⚠️ 网络错误，第 {retry_count} 次重试，等待 {wait_time:.2f} 秒...")
         time.sleep(wait_time)
     
+    # 记录翻页状态
+    if 'last_page_turn' in locals() and last_page_turn:
+        data['last_page_turn_index'] = index
+        # 保存原始状态，以便回退
+        if '_original_progress' not in data:
+            data['_original_progress'] = current_progress
+            data['_original_ps'] = data['ps']
+            data['_original_pc'] = data['pc']
+    
+    last_page_turn = False  # 重置翻页标记
     data.pop('s', None)  # 安全移除's'键
 
 logging.info("🎉 阅读脚本已完成！")
