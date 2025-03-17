@@ -6,12 +6,14 @@ import re
 
 """
 可修改区域
-默认使用本地值，如果本地值不存在则从环境变量中获取值
+默认使用本地值如果不存在从环境变量中获取值
 """
 
-# 阅读次数设置 - 每次计为30秒，默认120次相当于60分钟
-# 可通过环境变量READ_NUM覆盖
-READ_NUM = int(os.getenv('READ_NUM') or 120)
+# 阅读时间 默认60分钟
+READ_TIME = int(os.getenv('READ_TIME') or 60)
+# 单次阅读时间的波动范围(秒)，默认在20-40秒之间波动
+READ_MIN_INTERVAL = int(os.getenv('READ_MIN_INTERVAL') or 20)
+READ_MAX_INTERVAL = int(os.getenv('READ_MAX_INTERVAL') or 40)
 
 # 推送通知方式 - 支持pushplus、wxpusher、telegram三种方式
 # 留空表示不推送通知
@@ -124,3 +126,54 @@ def convert(curl_command):
 # 如果环境变量中有curl命令，则使用它提取headers和cookies
 # 否则使用上面定义的默认值
 headers, cookies = convert(curl_str) if curl_str else (headers, cookies)
+
+"""
+生成随机阅读时间序列的函数
+"""
+def generate_reading_intervals(total_minutes, min_seconds=20, max_seconds=40):
+    """
+    根据总阅读时间生成随机的阅读时间序列
+    
+    Args:
+        total_minutes (int): 总阅读时间(分钟)
+        min_seconds (int): 最小阅读间隔(秒)
+        max_seconds (int): 最大阅读间隔(秒)
+        
+    Returns:
+        list: 阅读时间间隔列表(秒)
+    """
+    import random
+    
+    if total_minutes <= 0:
+        return []
+        
+    total_seconds = total_minutes * 60
+    intervals = []
+    
+    # 生成随机间隔，直到总时间接近目标时间
+    current_total = 0
+    while current_total < total_seconds:
+        # 如果剩余时间不足最小间隔，就用剩余时间作为最后一个间隔
+        remaining = total_seconds - current_total
+        if remaining < min_seconds:
+            if remaining > 5:  # 如果剩余时间太少但还有意义，添加最后一个间隔
+                intervals.append(remaining)
+            break
+            
+        # 生成随机间隔，但确保不会超过总时间
+        interval = min(random.randint(min_seconds, max_seconds), remaining)
+        intervals.append(interval)
+        current_total += interval
+    
+    return intervals
+
+# 根据总时间生成阅读间隔序列
+reading_intervals = generate_reading_intervals(
+    READ_TIME, 
+    READ_MIN_INTERVAL, 
+    READ_MAX_INTERVAL
+)
+
+# 如果没有生成有效的间隔序列，添加一个默认间隔
+if not reading_intervals:
+    reading_intervals = [30]  # 默认至少读30秒
