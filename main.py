@@ -51,7 +51,31 @@ def get_wr_skey():
     return None
 
 
+def simulate_page_turn(current_progress):
+    """模拟翻页，更新阅读进度参数"""
+    # 随机增加阅读进度（1-3个百分点）
+    progress_increment = random.randint(1, 3)
+    new_progress = min(current_progress + progress_increment, 100)
+    
+    # 更新data中的进度相关参数
+    data['pr'] = new_progress
+    
+    # 更新页面位置参数（ps和pc通常是页面位置的标识）
+    # 这里使用简单的随机字符串模拟新的页面位置
+    page_id = hashlib.md5(str(time.time()).encode()).hexdigest()[:20]
+    data['ps'] = f"b1d32a307a4c3259g{page_id[:6]}"
+    data['pc'] = f"080327b07a4c3259g{page_id[6:12]}"
+    
+    # 更新章节位置（如果需要）
+    if new_progress > 90 and data['ci'] < 100:
+        data['ci'] += 1
+    
+    logging.info(f"📖 模拟翻页，阅读进度更新为: {new_progress}%")
+    return new_progress
+
+
 index = 1
+current_progress = data['pr']  # 初始阅读进度
 while index <= READ_NUM:
     data['ct'] = int(time.time())
     data['ts'] = int(time.time() * 1000)
@@ -65,8 +89,16 @@ while index <= READ_NUM:
 
     if 'succ' in resData:
         index += 1
-        time.sleep(30)
-        logging.info(f"✅ 阅读成功，阅读进度：{(index - 1) * 0.5} 分钟")
+        
+        # 随机决定是否翻页
+        if random.random() < 0.7:  # 70%的概率翻页
+            current_progress = simulate_page_turn(current_progress)
+        
+        # 随机等待时间（20-40秒）
+        wait_time = random.randint(20, 40)
+        logging.info(f"✅ 阅读成功，等待 {wait_time} 秒后继续...")
+        time.sleep(wait_time)
+        logging.info(f"📊 阅读进度：{(index - 1) * 0.5} 分钟")
 
     else:
         logging.warning("❌ cookie 已过期，尝试刷新...")
@@ -86,4 +118,4 @@ logging.info("🎉 阅读脚本已完成！")
 
 if PUSH_METHOD not in (None, ''):
     logging.info("⏱️ 开始推送...")
-    push(f"🎉 微信读书自动阅读完成！\n⏱️ 阅读时长：{(index - 1) * 0.5}分钟。", PUSH_METHOD)
+    push(f"🎉 微信读书自动阅读完成！\n⏱️ 阅读时长：{(index - 1) * 0.5}分钟。\n📖 最终阅读进度：{current_progress}%", PUSH_METHOD)
