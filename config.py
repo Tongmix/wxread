@@ -15,6 +15,10 @@ READ_TIME = int(os.getenv('READ_TIME') or 60)
 READ_MIN_INTERVAL = int(os.getenv('READ_MIN_INTERVAL') or 20)
 READ_MAX_INTERVAL = int(os.getenv('READ_MAX_INTERVAL') or 40)
 
+# 打印环境变量，帮助调试
+print(f"环境变量 READ_TIME = {os.getenv('READ_TIME')}")
+print(f"使用的 READ_TIME = {READ_TIME}")
+
 # 推送通知方式 - 支持pushplus、wxpusher、telegram三种方式
 # 留空表示不推送通知
 PUSH_METHOD = "" or os.getenv('PUSH_METHOD')
@@ -145,7 +149,7 @@ def generate_reading_intervals(total_minutes, min_seconds=20, max_seconds=40):
     import random
     
     if total_minutes <= 0:
-        return []
+        return [30] * 120  # 如果时间无效，返回默认值
         
     total_seconds = total_minutes * 60
     intervals = []
@@ -176,4 +180,7 @@ reading_intervals = generate_reading_intervals(
 
 # 如果没有生成有效的间隔序列，添加一个默认间隔
 if not reading_intervals:
-    reading_intervals = [30]  # 默认至少读30秒
+    print("警告：未能生成有效的阅读间隔序列，使用默认值")
+    reading_intervals = [30] * 120  # 默认120次，每次30秒
+
+print(f"生成了 {len(reading_intervals)} 个阅读间隔，总时间约 {sum(reading_intervals)/60:.1f} 分钟")
