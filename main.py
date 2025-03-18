@@ -10,7 +10,7 @@ import hashlib
 import requests
 import urllib.parse
 from push import push  # 导入推送通知模块
-from config import data, headers, cookies, reading_intervals, READ_TIME, PUSH_METHOD  # 导入配置
+from config import get_data, headers, cookies, reading_intervals, READ_TIME, PUSH_METHOD  # 导入配置
 
 # 配置日志记录
 logger = logging.getLogger(__name__)
@@ -85,16 +85,18 @@ logging.info(f"🔍 前5个阅读间隔: {reading_intervals[:5] if len(reading_i
 
 index = 1
 while index <= total_intervals:
+    # 获取当前请求所使用的 data 配置
+    current_data = get_data()
     # 更新请求数据中的时间戳和随机数
-    data['ct'] = int(time.time())
-    data['ts'] = int(time.time() * 1000)
-    data['rn'] = random.randint(0, 1000)
+    current_data['ct'] = int(time.time())
+    current_datadata['ts'] = int(time.time() * 1000)
+    current_data['rn'] = random.randint(0, 1000)
     
     # 计算安全签名
-    data['sg'] = hashlib.sha256(f"{data['ts']}{data['rn']}{KEY}".encode()).hexdigest()
+    current_data['sg'] = hashlib.sha256(f"{current_data['ts']}{current_data['rn']}{KEY}".encode()).hexdigest()
     
     # 计算请求数据的哈希值
-    data['s'] = cal_hash(encode_data(data))
+    current_data['s'] = cal_hash(encode_data(data))
 
     # 发送阅读请求
     logging.info(f"⏱️ 尝试第 {index}/{total_intervals} 次阅读...")
