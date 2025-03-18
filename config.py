@@ -39,12 +39,12 @@ curl_str = os.getenv('WXREAD_CURL_BASH')
 # 默认cookies配置 - 本地或Docker部署时需要替换为自己的cookies
 # 这些是示例值，实际使用时需要替换
 cookies = {
-    'RK': 'xzsh0fMOVJ',
-    'ptcz': '626491ceda7231fb30fe8ec33d45412f8c7ff2c43debfe9f9b751367454ba191',
+    'RK': 'oxEY1bTnXf',
+    'ptcz': '53e3b35a9486dd63c4d06430b05aa169402117fc407dc5cc9329b41e59f62e2b',
     'pac_uid': '0_e63870bcecc18',
     'iip': '0',
-    '_qimei_uuid42': '191150d120510054c6141a3309bda049b26a822f6d',
-    'wr_avatar': 'https%3A%2F%2Fthirdwx.qlogo.cn%2Fmmopen%2Fvi_32%2FPiajxSqBRaEIbibQ84hicAvZ2gZXpCCc41wxM1ZnSe0yUB9VxPSpeG1DZtkacPZYnxE0N2O67czsS1bwPmkDPVbQjCfkSYWrdQ2Ru1w7JmSW1TnPQNzsQiaBbQ%2F132',
+    '_qimei_uuid42': '183070d3135100ee797b08bc922054dc3062834291',
+    'wr_avatar': 'https%3A%2F%2Fthirdwx.qlogo.cn%2Fmmopen%2Fvi_32%2FeEOpSbFh2Mb1bUxMW9Y3FRPfXwWvOLaNlsjWIkcKeeNg6vlVS5kOVuhNKGQ1M8zaggLqMPmpE5qIUdqEXlQgYg%2F132',
     'wr_gender': '0',
 }
 
