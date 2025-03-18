@@ -96,7 +96,7 @@ while index <= total_intervals:
     current_data['sg'] = hashlib.sha256(f"{current_data['ts']}{current_data['rn']}{KEY}".encode()).hexdigest()
     
     # 计算请求数据的哈希值
-    current_data['s'] = cal_hash(encode_data(data))
+    current_data['s'] = cal_hash(encode_data(current_data))
 
     # 发送阅读请求
     logging.info(f"⏱️ 尝试第 {index}/{total_intervals} 次阅读...")
