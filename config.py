@@ -176,5 +176,5 @@ reading_intervals = generate_reading_intervals(
 
 # 如果没有生成有效的间隔序列，添加一个默认间隔
 if not reading_intervals:
-    print("警告：未能生成有效的阅读间隔序列，使用默认值")
+    logging.warning("警告：未能生成有效的阅读间隔序列，使用默认值")
     reading_intervals = [30] * 120  # 默认120次，每次30秒
