@@ -2,7 +2,7 @@ name: wxread
 
 on:
   schedule:
-    - cron: '0 17 * * *'  # 每天北京时间凌晨1点执行（UTC时间17点）
+    - cron: '0 19 * * *'  # 每天北京时间凌晨3点执行（UTC时间17点）
   workflow_dispatch:  # 手动触发
 
 jobs:
@@ -30,6 +30,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install certifi==2024.8.30 charset-normalizer==3.4.0 idna==3.10 requests==2.32.3 urllib3==2.2.3
 
+      # 新增：随机延时，最多30分钟（1800秒）
+    - name: Random sleep
+      run: |
+        DELAY=$((RANDOM % 1800))
+        echo "Random sleep $DELAY seconds..."
+        sleep $DELAY
+        
     - name: Run deployment script
       env:
         WXREAD_CURL_BASH: ${{ secrets.WXREAD_CURL_BASH }}
