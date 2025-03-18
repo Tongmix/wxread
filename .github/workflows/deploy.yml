@@ -32,8 +32,9 @@ jobs:
 
       # 新增：随机延时，最多30分钟（1800秒）
     - name: Random sleep
+      if: ${{ github.event_name == 'schedule' }}
       run: |
-        DELAY=$((RANDOM % 1800))
+        DELAY=$((RANDOM % 1800))    # 0 ~ 1800秒随机延时
         echo "Random sleep $DELAY seconds..."
         sleep $DELAY
         
