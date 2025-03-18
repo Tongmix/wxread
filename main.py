@@ -134,7 +134,7 @@ while index <= total_intervals:
             raise Exception(ERROR_CODE)
     
     # 移除签名字段，准备下一次请求
-    data.pop('s')
+    current_data.pop('s')
 
 # 阅读完成
 minutes_read = total_read_time / 60
