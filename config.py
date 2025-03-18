@@ -106,7 +106,7 @@ def get_data():
         # 可以添加更多备用数据组
     ]
         # 以30%的几率返回备用数据中的随机一组
-    if random.random() < 0.6:
+    if random.random() < 0.1:
         return random.choice(alternate_data_list)
     return default_data
     
@@ -171,7 +171,6 @@ def generate_reading_intervals(total_minutes, min_seconds=20, max_seconds=40):
     Returns:
         list: 阅读时间间隔列表(秒)
     """
-    import random
     
     if total_minutes <= 0:
         return [30] * 120  # 如果时间无效，返回默认值
