@@ -124,7 +124,7 @@ alternate_data_list = [
     ]
     
     # 以30%的几率返回备用数据中的随机一组
-    if random.random() < 0.6:
+if random.random() < 0.6:
         return random.choice(alternate_data_list)
     return default_data
 
