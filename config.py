@@ -86,6 +86,10 @@ def get_data():
     'ps': '98f32cb07a628a09g018409',
     'pc': 'eee324f07a628a0ag011bd9',
     }
+        # 以30%的几率返回备用数据中的随机一组
+    if random.random() < 0.6:
+        return random.choice(alternate_data_list)
+    return default_data
 alternate_data_list = [
         {
     'appId': 'wb182564874663h776775553',
@@ -121,11 +125,6 @@ alternate_data_list = [
         },
         # 可以添加更多备用数据组
     ]
-    
-    # 以30%的几率返回备用数据中的随机一组
-    if random.random() < 0.6:
-        return random.choice(alternate_data_list)
-    return default_data
 
 def convert(curl_command):
     """从curl命令中提取headers和cookies
