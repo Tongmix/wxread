@@ -100,7 +100,7 @@ while index <= total_intervals:
 
     # 发送阅读请求
     logging.info(f"⏱️ 尝试第 {index}/{total_intervals} 次阅读...")
-    response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(data, separators=(',', ':')))
+    response = requests.post(READ_URL, headers=headers, cookies=cookies, data=json.dumps(current_data, separators=(',', ':')))
     resData = response.json()
 
     if 'succ' in resData:
