@@ -89,7 +89,7 @@ while index <= total_intervals:
     current_data = get_data()
     # 更新请求数据中的时间戳和随机数
     current_data['ct'] = int(time.time())
-    current_datadata['ts'] = int(time.time() * 1000)
+    current_data['ts'] = int(time.time() * 1000)
     current_data['rn'] = random.randint(0, 1000)
     
     # 计算安全签名
