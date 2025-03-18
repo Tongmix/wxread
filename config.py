@@ -105,7 +105,7 @@ def get_data():
         },
         # 可以添加更多备用数据组
     ]
-        # 以30%的几率返回备用数据中的随机一组
+        # 以指定的几率返回备用数据中的随机一组
     if random.random() < 0.5:
         return random.choice(alternate_data_list)
     return default_data
