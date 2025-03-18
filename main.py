@@ -128,8 +128,10 @@ while index <= total_intervals:
             # 刷新失败，终止程序
             ERROR_CODE = "❌ 无法获取新密钥或者WXREAD_CURL_BASH配置有误，终止运行。"
             logging.error(ERROR_CODE)
-            push(ERROR_CODE, PUSH_METHOD)  # 发送错误通知
             raise Exception(ERROR_CODE)
+            if PUSH_METHOD not in (None, ''):
+            push(ERROR_CODE, PUSH_METHOD)  # 发送错误通知
+
     
     # 移除签名字段，准备下一次请求
     data.pop('s')
