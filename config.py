@@ -87,7 +87,7 @@ def get_data():
     'pc': 'eee324f07a628a0ag011bd9',
     }
         # 以30%的几率返回备用数据中的随机一组
-    if random.random() < 0.6:
+    if random.random() < 0.15:
         return random.choice(alternate_data_list)
     return default_data
 alternate_data_list = [
